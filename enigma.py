@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 from string import ascii_uppercase
-from collections import deque
 from random import seed, sample
 from sys import exit
 
@@ -18,6 +17,8 @@ PERMUTATIONS = {
 } # two pairs of letters that will be permuted
 ROTORS = list()
 
+# /!\ implémenter le réflecteur /!\
+
 def get_initialized_rotors():
     rotors = list()
     for num_rotor in range(len(ROTORS_CONF)):
@@ -33,29 +34,37 @@ def make_rotor(my_seed):
     return sample(ALPHABET, len(ALPHABET))
 
 def set_rotor_position(rotor, rotor_position):
-    rotor = deque(rotor)
-    while rotor[0] != rotor_position:
-        rotor.rotate(1)
+    initialized_rotor = rotor
+    while initialized_rotor[0] != rotor_position:
+        initialized_rotor = rotate(initialized_rotor)
 
-    return list(rotor)
+    return initialized_rotor
 
 def encrypt(text):
     input_list = list(text)
     output_list = list()
-    if not verify(text_list):
+    if not verify(input_list):
         print('Your input text contain a letter that is not supported.') # afficher l'alphabet
         exit(1)
-    for letter in text:
+    for letter in input_list:
         output_list.append(process(letter))
 
-    return str(output_list)
+    return ''.join(output_list)
 
 def decrypt():
     pass
 
-def process(letter):
-        index_rotor1 = ROTORS[0].index(letter)
-        permut = ROTORS[1]
+def process(letter_in):
+    letter_out = ''
+    alphabet = ALPHABET
+    for rotor in ROTORS:
+        letter_out = rotor[alphabet.index(letter_in)]
+        alphabet = rotor
+#       add reflector here
+    rotate_rotors()
+
+    return letter_out
+        
 
 def verify(text):
     for letter in text:
@@ -65,7 +74,13 @@ def verify(text):
     return True
 
 def rotate_rotors():
-    pass
+    ROTORS[0] = rotate(ROTORS[0])
+    for rotor_num in range(len(ROTORS)):
+        if ROTORS[rotor_num][0] == ROTORS_CONF[rotor_num]['position']:
+            ROTORS[rotor_num + 1] = rotate(ROTORS[rotor_num + 1])
 
+def rotate(my_list):
+    return my_list[1:] + my_list[:1]
 
 ROTORS = get_initialized_rotors()
+print(encrypt('AABB'))
